@@ -289,8 +289,20 @@
 
     drawWheel();
 
+    // Kiểm tra đã quay chưa
+    const playerData = JSON.parse(localStorage.getItem("playerData") || "{}");
+    const spinKey = "spun_" + (playerData.email || "guest");
+
+    if (localStorage.getItem(spinKey)) {
+      spinBtn.textContent = "Bạn đã quay rồi 🎉";
+      spinBtn.disabled = true;
+      spinBtn.style.opacity = "0.5";
+      spinBtn.style.cursor = "not-allowed";
+    }
+
     spinBtn.addEventListener("click", () => {
       if (spinning) return;
+      if (localStorage.getItem(spinKey)) return;
       spinning = true;
       result.textContent = "";
 
@@ -319,7 +331,13 @@
 
           const prize = prizes[winningIndex].label;
 
-          const playerData = JSON.parse(localStorage.getItem("playerData") || "{}");
+          // Đánh dấu đã quay
+          localStorage.setItem(spinKey, "1");
+          spinBtn.textContent = "Bạn đã quay rồi 🎉";
+          spinBtn.disabled = true;
+          spinBtn.style.opacity = "0.5";
+          spinBtn.style.cursor = "not-allowed";
+
           const playerName = playerData.fullname || "Bạn";
 
           result.innerHTML = `🎉 <span style="color:#ea580c">${playerName}</span> nhận được <b>${prize}</b>`;
