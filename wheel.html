@@ -208,11 +208,12 @@
     const spinBtn = document.getElementById("spinBtn");
     const result = document.getElementById("result");
 
+    // 4 ô bằng nhau, tỷ lệ trúng: quạt 40%, móc khóa 40%, túi tote 10%, gối cổ 10%
     const prizes = [
-      "🎧 Tai nghe",
-      "🎁 Móc khóa",
-      "👜 Túi tote",
-      "🛏️ Gối cổ"
+      { label: "🌀 Quạt",      weight: 40 },
+      { label: "🎁 Móc khóa",  weight: 40 },
+      { label: "👜 Túi tote",  weight: 10 },
+      { label: "🛏️ Gối cổ",   weight: 10 },
     ];
 
     const colors = [
@@ -223,6 +224,17 @@
     ];
 
     const arc = (2 * Math.PI) / prizes.length;
+
+    // Chọn phần thưởng theo tỷ lệ weight
+    function pickWinner() {
+      const total = prizes.reduce((s, p) => s + p.weight, 0);
+      let rand = Math.random() * total;
+      for (let i = 0; i < prizes.length; i++) {
+        rand -= prizes[i].weight;
+        if (rand <= 0) return i;
+      }
+      return prizes.length - 1;
+    }
 
     let angle = 0;
     let spinning = false;
@@ -267,7 +279,7 @@
         ctx.fillStyle = "#fff";
         ctx.font = "bold 18px sans-serif";
 
-        ctx.fillText(prizes[i], 130, 10);
+        ctx.fillText(prizes[i].label, 130, 10);
 
         ctx.restore();
       }
@@ -278,75 +290,53 @@
     drawWheel();
 
     spinBtn.addEventListener("click", () => {
-
       if (spinning) return;
-
       spinning = true;
-
       result.textContent = "";
 
-      const spinTime = 4500;
-      const spinAngle = Math.random() * 360 + 1800;
+      // Chọn ô thắng theo tỷ lệ
+      const winningIndex = pickWinner();
 
-      const start = Date.now();
+      // Tính góc dừng: kim ở trên (270°), ô winningIndex nằm ở giữa slice đó
+      const sliceMidDeg = winningIndex * (360 / prizes.length) + (360 / prizes.length / 2);
+      const stopDeg = 360 * 5 + (270 - sliceMidDeg);
+
+      const spinTime = 4500;
+      const startTime = Date.now();
 
       function animate() {
-
-        const now = Date.now();
-
-        const elapsed = now - start;
-
+        const elapsed = Date.now() - startTime;
         const progress = Math.min(elapsed / spinTime, 1);
-
         const easing = 1 - Math.pow(1 - progress, 4);
-
-        const currentAngle = (spinAngle * easing) * Math.PI / 180;
+        const currentAngle = (stopDeg * easing) * Math.PI / 180;
 
         drawWheel(currentAngle);
 
         if (progress < 1) {
-
           requestAnimationFrame(animate);
-
         } else {
-
-          angle = (spinAngle % 360);
-
           spinning = false;
 
-          const normalized =
-            (360 - angle + 270) % 360;
+          const prize = prizes[winningIndex].label;
 
-          const winningIndex =
-            Math.floor(normalized / (360 / prizes.length));
+          const playerData = JSON.parse(localStorage.getItem("playerData") || "{}");
+          const playerName = playerData.fullname || "Bạn";
 
-          const prize = prizes[winningIndex];
-
-          const playerData =
-            JSON.parse(localStorage.getItem("playerData") || "{}");
-
-          const playerName =
-            playerData.fullname || "Bạn";
-
-          result.innerHTML =
-            `🎉 <span style="color:#ea580c">${playerName}</span> nhận được <b>${prize}</b>`;
+          result.innerHTML = `🎉 <span style="color:#ea580c">${playerName}</span> nhận được <b>${prize}</b>`;
 
           fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
-            body: new URLSearchParams({
+            mode: "no-cors",
+            body: JSON.stringify({
               fullname: playerData.fullname,
               email: playerData.email,
               phone: playerData.phone,
               major: playerData.major,
-              studyPlan: playerData.studyPlan,
               prize: prize
             })
           })
-            .then(res => res.text())
-            .then(txt => console.log("📩 Thành công:", txt))
-            .catch(err => {
-              alert("❌ Lỗi lưu dữ liệu: " + err.message);
-            });
+            .then(() => console.log("📩 Thành công"))
+            .catch(err => console.log("Lỗi:", err));
         }
       }
 
