@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Vòng quay may mắn</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background: linear-gradient(135deg, #fff7ed, #fde68a);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      position: relative;
+    }
+
+    .title {
+      font-size: 42px;
+      font-weight: 800;
+      color: #ea580c;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .subtitle {
+      color: #7c2d12;
+      margin-bottom: 30px;
+      font-size: 18px;
+    }
+
+    /* KHUNG vòng quay */
+    .wheel-wrapper {
+      position: relative;
+
+      width: 320px;
+      height: 320px;
+
+      margin: auto;
+    }
+
+    /* CANVAS */
+    #wheelCanvas {
+      width: 320px;
+      height: 320px;
+
+      border-radius: 50%;
+      border: 10px solid #fff;
+
+      box-shadow:
+        0 0 0 8px #f97316,
+        0 12px 30px rgba(0, 0, 0, 0.2);
+
+      display: block;
+    }
+
+    /* LOGO GIỮA */
+    .center-circle {
+      position: absolute;
+
+      width: 72px;
+      height: 72px;
+
+      background: #fff;
+      border: 8px solid #f97316;
+      border-radius: 50%;
+
+      top: 50%;
+      left: 50%;
+
+      transform: translate(-50%, -50%);
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 24px;
+      font-weight: 800;
+
+      color: #ea580c;
+
+      z-index: 20;
+    }
+
+    /* MŨI TÊN */
+    .pointer {
+      position: absolute;
+
+      top: -2px;
+      left: 50%;
+
+      transform: translateX(-50%);
+
+      width: 0;
+      height: 0;
+
+      border-left: 22px solid transparent;
+      border-right: 22px solid transparent;
+      border-top: 40px solid #dc2626;
+
+      z-index: 30;
+
+      filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.25));
+    }
+
+    #spinBtn {
+      margin-top: 25px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      padding: 14px 40px;
+      border-radius: 999px;
+      border: none;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    #spinBtn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 14px 24px rgba(37, 99, 235, 0.45);
+    }
+
+    #spinBtn:active {
+      transform: scale(0.97);
+    }
+
+    #result {
+      margin-top: 24px;
+      font-size: 24px;
+      font-weight: 800;
+      color: #c2410c;
+      min-height: 40px;
+    }
+
+    .glow {
+      animation: glow 1.2s infinite alternate;
+    }
+
+    @keyframes glow {
+      from {
+        box-shadow:
+          0 0 10px #f97316,
+          0 0 20px #fb923c;
+      }
+
+      to {
+        box-shadow:
+          0 0 20px #facc15,
+          0 0 40px #f97316;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <h1 class="title">🎁 VÒNG QUAY MAY MẮN</h1>
+    <p class="subtitle">Chúc bạn nhận được phần quà thật hấp dẫn!</p>
+
+    <div class="wheel-wrapper">
+
+      <canvas id="wheelCanvas" width="320" height="320" class="glow"></canvas>
+
+      <!-- Kim chỉ -->
+      <div class="pointer"></div>
+
+      <!-- Tâm vòng quay -->
+      <div class="center-circle">
+        FSB
+      </div>
+
+    </div>
+
+    <button id="spinBtn">
+      🎯 Quay ngay
+    </button>
+
+    <p id="result"></p>
+
+  </div>
+
+  <script>
+    const GOOGLE_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycbw1EfN-2NBLQt2sYQ6sHVkEYo76AMNAM2B6-xlIGdfykFPPuv_W31XMNkeQx9EAD7Zn/exec";
+
+    const canvas = document.getElementById("wheelCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const spinBtn = document.getElementById("spinBtn");
+    const result = document.getElementById("result");
+
+    const prizes = [
+      "🎧 Tai nghe",
+      "🎁 Móc khóa",
+      "👜 Túi tote",
+      "🛏️ Gối cổ"
+    ];
+
+    const colors = [
+      "#f97316",
+      "#fb923c",
+      "#f59e0b",
+      "#ea580c"
+    ];
+
+    const arc = (2 * Math.PI) / prizes.length;
+
+    let angle = 0;
+    let spinning = false;
+
+    function drawWheel(rotation = 0) {
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.save();
+
+      ctx.translate(160, 160);
+      ctx.rotate(rotation);
+      ctx.translate(-160, -160);
+
+      for (let i = 0; i < prizes.length; i++) {
+
+        const start = i * arc;
+
+        ctx.beginPath();
+        ctx.fillStyle = colors[i];
+
+        ctx.moveTo(160, 160);
+
+        ctx.arc(160, 160, 160, start, start + arc);
+
+        ctx.fill();
+
+        // Viền
+        ctx.strokeStyle = "#fff";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Text
+        ctx.save();
+
+        ctx.translate(160, 160);
+
+        ctx.rotate(start + arc / 2);
+
+        ctx.textAlign = "right";
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 18px sans-serif";
+
+        ctx.fillText(prizes[i], 130, 10);
+
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    drawWheel();
+
+    spinBtn.addEventListener("click", () => {
+
+      if (spinning) return;
+
+      spinning = true;
+
+      result.textContent = "";
+
+      const spinTime = 4500;
+      const spinAngle = Math.random() * 360 + 1800;
+
+      const start = Date.now();
+
+      function animate() {
+
+        const now = Date.now();
+
+        const elapsed = now - start;
+
+        const progress = Math.min(elapsed / spinTime, 1);
+
+        const easing = 1 - Math.pow(1 - progress, 4);
+
+        const currentAngle = (spinAngle * easing) * Math.PI / 180;
+
+        drawWheel(currentAngle);
+
+        if (progress < 1) {
+
+          requestAnimationFrame(animate);
+
+        } else {
+
+          angle = (spinAngle % 360);
+
+          spinning = false;
+
+          const normalized =
+            (360 - angle + 270) % 360;
+
+          const winningIndex =
+            Math.floor(normalized / (360 / prizes.length));
+
+          const prize = prizes[winningIndex];
+
+          const playerData =
+            JSON.parse(localStorage.getItem("playerData") || "{}");
+
+          const playerName =
+            playerData.fullname || "Bạn";
+
+          result.innerHTML =
+            `🎉 <span style="color:#ea580c">${playerName}</span> nhận được <b>${prize}</b>`;
+
+          fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            body: new URLSearchParams({
+              fullname: playerData.fullname,
+              email: playerData.email,
+              phone: playerData.phone,
+              major: playerData.major,
+              studyPlan: playerData.studyPlan,
+              prize: prize
+            })
+          })
+            .then(res => res.text())
+            .then(txt => console.log("📩 Thành công:", txt))
+            .catch(err => {
+              alert("❌ Lỗi lưu dữ liệu: " + err.message);
+            });
+        }
+      }
+
+      animate();
+    });
+  </script>
+
+</body>
+
+</html>

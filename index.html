@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>FSB - Đăng ký tham gia</title>
+
+  <!-- Tailwind -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      background:
+        linear-gradient(rgba(0, 0, 0, 0),
+          rgba(248, 250, 252, 0.96)),
+        url("https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=1600&auto=format&fit=crop");
+      background-size: cover;
+      background-position: center;
+    }
+
+    .form-card {
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(8px);
+
+      border: 1px solid #e5e7eb;
+
+      box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+
+    .input-style {
+      transition: all 0.2s ease;
+    }
+
+    .input-style:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.12);
+    }
+
+    .submit-btn {
+      background: #1d4ed8;
+      transition: all 0.25s ease;
+    }
+
+    .submit-btn:hover {
+      background: #1e40af;
+      transform: translateY(-1px);
+    }
+
+    .logo-circle {
+      background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center px-4">
+
+  <div class="form-card w-full max-w-lg rounded-3xl p-10">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+
+      <!-- Logo -->
+      <img src="./img/2025-LOGO-FSB CAM TRONG SUOT.png" alt="FSB Logo" class="w-full h-full object-contain">
+      <br>
+      <br>
+      <h1 class="text-3xl font-extrabold text-gray-900 mb-2">
+        Đăng ký tham gia
+      </h1>
+
+      <p class="text-gray-500 text-sm leading-relaxed">
+        Vui lòng hoàn tất thông tin để tham gia chương trình
+        <br>
+        Vòng quay may mắn của Viện Quản Trị & Công Nghệ FSB
+      </p>
+
+    </div>
+
+    <!-- Form -->
+    <form id="infoForm" class="space-y-6">
+
+      <!-- Name -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          Họ và tên
+        </label>
+
+        <input type="text" id="fullname" required placeholder="Nguyễn Văn A"
+          class="input-style w-full rounded-xl border border-gray-300 px-4 py-3 outline-none">
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          Email
+        </label>
+
+        <input type="email" id="email" required placeholder="example@email.com"
+          class="input-style w-full rounded-xl border border-gray-300 px-4 py-3 outline-none">
+      </div>
+
+      <!-- Phone -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          Số điện thoại
+        </label>
+
+        <input type="tel" id="phone" required placeholder="0901 234 567"
+          class="input-style w-full rounded-xl border border-gray-300 px-4 py-3 outline-none">
+      </div>
+
+      <!-- Company -->
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">
+          Tên doanh nghiệp
+        </label>
+
+        <input type="text" id="major" required placeholder="Công ty ABC"
+          class="input-style w-full rounded-xl border border-gray-300 px-4 py-3 outline-none">
+      </div>
+
+      <!-- Button -->
+      <div class="pt-2">
+        <button type="submit" class="submit-btn w-full rounded-xl py-4 text-white font-semibold text-base shadow-md">
+          Hoàn thành & tiếp tục
+        </button>
+      </div>
+
+    </form>
+
+    <!-- Footer -->
+    <div class="mt-8 pt-6 border-t border-gray-200 text-center">
+      <p class="text-xs text-gray-400">
+        FPT School of Business & Technology
+      </p>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
